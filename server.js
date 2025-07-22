@@ -4,6 +4,14 @@ const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 const path = require('path');
 
+app.get("/", (req, res) => {
+  res.redirect("/landing");
+});
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "html", "landing.html"));
+});
+
 // serve login page at /login
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'html', 'login.html'));
