@@ -9,6 +9,26 @@ html, body {
 .body *{
     border: 3px solid black;
 }
+
+
+.navBar {
+    border: 3px solid black;
+  width: 100vw;
+  height: 60px;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.logo{
+    left: 20px;
+    width:auto;
+    height:90%;
+}
 .main {
   width: 100vw; 
   height: 100%; 
