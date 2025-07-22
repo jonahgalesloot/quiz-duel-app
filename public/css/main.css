@@ -1,0 +1,30 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.body *{
+    border: 3px solid black;
+}
+.main {
+  width: 100vw; 
+  height: 100%; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+.detailsContainer {
+  width: 100%; 
+  max-width: 600px; 
+  padding: 20px; 
+  box-sizing: border-box;
+}
+
+.button {
+    height: 60px;
+
+}
