@@ -1,7 +1,7 @@
 // routes/auth.js
 const express = require('express');
 const bcrypt  = require('bcrypt');
-const fetch   = require('node-fetch');
+const fetch = require('node-fetch').default;
 
 module.exports = function(usersCol, codesCol) {
   const router = express.Router();
