@@ -39,7 +39,7 @@ io.on('connection', socket => {
 MongoClient.connect(MONGO_URI)
   .then(client => {
     console.log('✅ Connected to MongoDB');
-    const db       = client.db('quizduel');
+    const db       = client.db('quizzard');
     const usersCol = db.collection('users');
     const codesCol = db.collection('codes');
 
