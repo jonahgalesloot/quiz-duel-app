@@ -41,7 +41,7 @@ MongoClient.connect(MONGO_URI)
     console.log('✅ Connected to MongoDB');
     const db       = client.db('quizduel');
     const usersCol = db.collection('users');
-    const codesCol = db.collection('signupCodes');
+    const codesCol = db.collection('codes');
 
     // Mount page routes
     const pagesRouter = require('./routes/pages');
