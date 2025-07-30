@@ -1,26 +1,23 @@
 // server.js
 require('dotenv').config();
-
-const path      = require('path');
-const express   = require('express');
-const http      = require('http');
-const socketIo  = require('socket.io');
-const session   = require('express-session');
-const cookieParser = require('cookie-parser');
+const path          = require('path');
+const express       = require('express');
+const http          = require('http');
+const socketIo      = require('socket.io');
+const session       = require('express-session');
+const cookieParser  = require('cookie-parser');
 const { MongoClient } = require('mongodb');
 
 const app     = express();
 const server  = http.createServer(app);
 const io      = socketIo(server);
 
-const PORT     = process.env.PORT || 3000;
-const MONGO_URI      = process.env.MONGO_URI;
-const SESSION_SECRET = process.env.SESSION_SECRET;
-const RECAPTCHA_SITE = process.env.RECAPTCHA_SITE_KEY;
+const PORT            = process.env.PORT || 3000;
+const MONGO_URI       = process.env.MONGO_URI;
+const SESSION_SECRET  = process.env.SESSION_SECRET;
+const RECAPTCHA_SITE  = process.env.RECAPTCHA_SITE_KEY;
 
-// ————————————————
-// Express Middleware
-// ————————————————
+// ————— Middleware —————
 app.use(express.json());
 app.use(cookieParser());
 app.use(session({
@@ -31,38 +28,34 @@ app.use(session({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ————————————————
-// Database Connection
-// ————————————————
-let db, usersCol, codesCol;
-MongoClient.connect(MONGO_URI, { useUnifiedTopology: true })
-  .then(client => {
-    db         = client.db('quizduel');
-    usersCol   = db.collection('users');
-    codesCol   = db.collection('signupCodes');
-    console.log('✅ MongoDB connected');
-  })
-  .catch(err => console.error('MongoDB connection error:', err));
-
-// ————————————————
-// Socket.io for reCAPTCHA key
-// ————————————————
+// ————— Socket.io for reCAPTCHA key —————
 io.on('connection', socket => {
   socket.on('requestCaptchaKey', () => {
     socket.emit('captchaKey', RECAPTCHA_SITE);
   });
 });
 
-// ————————————————
-// Mount Routes
-// ————————————————
-app.use('/',   require('./routes/pages'));
-app.use('/',   require('./routes/auth')(usersCol, codesCol));  
-// note: auth.js exports a function taking the two collections
+// ————— Connect to MongoDB & Mount Routes —————
+MongoClient.connect(MONGO_URI)
+  .then(client => {
+    console.log('✅ Connected to MongoDB');
+    const db       = client.db('quizduel');
+    const usersCol = db.collection('users');
+    const codesCol = db.collection('signupCodes');
 
-// ————————————————
-// Start Server
-// ————————————————
-server.listen(PORT, () => {
-  console.log(`🚀 Listening on http://localhost:${PORT}`);
-});
+    // Mount page routes
+    const pagesRouter = require('./routes/pages');
+    app.use('/', pagesRouter);
+
+    // Mount auth routes, injecting the collections
+    const authRouter = require('./routes/auth')(usersCol, codesCol);
+    app.use('/', authRouter);
+
+    // Start listening *after* routes are mounted
+    server.listen(PORT, () => {
+      console.log(`🚀 Server listening on http://localhost:${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+  });
