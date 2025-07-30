@@ -19,26 +19,23 @@
       <h1>Create Your Account</h1>
       <p>Sign up to start challenging friends!</p>
 
-      <form id="signupForm" action="/signup" method="post">
-        <input name="username" type="text" placeholder="Username" required />
-        <input name="password" type="password" placeholder="Password" required />
+      <form id="signupForm">
+  <input name="username" type="text"    placeholder="Username"        required />
+  <input name="password" type="password" placeholder="Password"        required />
+  <input name="confirmPassword" type="password"
+         placeholder="Confirm Password" required />
 
-        <!-- 1) This empty div is where the reCAPTCHA v2 widget will render -->
-        <div class="g-recaptcha"></div>
+  <!-- NEW: signup code field -->
+  <input name="signupCode" type="text" placeholder="Signup Code" required />
 
-        <button type="submit" class="button">Sign Up</button>
-      </form>
-    </div>
-  </main>
+  <div class="g-recaptcha"></div>
+  <button type="submit" class="button">Sign Up</button>
+</form>
 
-  <!-- 2) Socket.IO client -->
-  <script src="/socket.io/socket.io.js"></script>
-  <!-- 3) Google reCAPTCHA API (v2 explicit render) -->
-  <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
-  <!-- 4) Your shared auth.js, which:
-           - requests the site key over Socket.IO
-           - calls grecaptcha.render on every .g-recaptcha
-           - handles form enable/disable and submission -->
-  <script src="/js/auth.js" defer></script>
+<!-- replace auth.js with signup.js -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+<script src="/js/signup.js" defer></script>
+
 </body>
 </html>
