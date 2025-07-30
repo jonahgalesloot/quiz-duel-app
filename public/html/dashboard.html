@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard – QuizDuel</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <header id="navBar">
+    <a class="logo" href="/landing"><img src="/images/logo1.png" alt="QuizDuel Logo" /></a>
+    <nav>
+      <a class="link" href="/play">Play</a>
+      <a class="link" href="/logout" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+      <form id="logoutForm" action="/logout" method="post" style="display:none;"></form>
+    </nav>
+  </header>
+
+  <main class="main">
+    <div class="detailsContainer">
+      <h1>Welcome, <span id="usernameDisplay">User</span></h1>
+      <p>Your current rating: <strong><span id="ratingDisplay">1200</span></strong></p>
+      <p>Choose an action below:</p>
+      <div>
+        <a class="button" href="/play">Start a Duel</a>
+        <a class="button" href="/leaderboard">View Leaderboard</a>
+        <a class="button" href="/profile">Your Profile</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Placeholder: fetch real user info if you like
+    document.getElementById('usernameDisplay').textContent = sessionStorage.getItem('username') || 'Player';
+    document.getElementById('ratingDisplay').textContent = sessionStorage.getItem('rating') || '1200';
+  </script>
+</body>
+</html>

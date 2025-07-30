@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sign Up – QuizDuel</title>
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <header id="navBar">
+    <a class="logo" href="/landing"><img src="/images/logo1.png" alt="QuizDuel Logo" /></a>
+    <nav>
+      <a class="link" href="/login">Login</a>
+    </nav>
+  </header>
+
+  <main class="main">
+    <div class="detailsContainer">
+      <h1>Create Your Account</h1>
+      <p>Sign up to start challenging friends!</p>
+
+      <form id="signupForm" action="/signup" method="post">
+        <input name="username" type="text" placeholder="Username" required />
+        <input name="password" type="password" placeholder="Password" required />
+
+        <!-- 1) This empty div is where the reCAPTCHA v2 widget will render -->
+        <div class="g-recaptcha"></div>
+
+        <button type="submit" class="button">Sign Up</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- 2) Socket.IO client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- 3) Google reCAPTCHA API (v2 explicit render) -->
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+  <!-- 4) Your shared auth.js, which:
+           - requests the site key over Socket.IO
+           - calls grecaptcha.render on every .g-recaptcha
+           - handles form enable/disable and submission -->
+  <script src="/js/auth.js" defer></script>
+</body>
+</html>
