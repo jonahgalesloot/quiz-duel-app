@@ -4,7 +4,8 @@ const path          = require('path');
 const express       = require('express');
 const http          = require('http');
 const socketIo      = require('socket.io');
-const session       = require('express-session');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const cookieParser  = require('cookie-parser');
 const { MongoClient } = require('mongodb');
 
@@ -24,7 +25,13 @@ app.use(session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true }
+  cookie: { httpOnly: true },
+  store: MongoStore.create({
+    mongoUrl: MONGO_URI,
+    dbName: 'quizduel',
+    collectionName: 'sessions',
+    ttl: 1000 * 60 * 60 * 24, // Optional: 1 day session expiry
+  })
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 

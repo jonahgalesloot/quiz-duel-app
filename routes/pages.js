@@ -11,7 +11,7 @@ router.get('/signup',         (req, res) => res.sendFile(path.join(__dirname, '.
 
 // Protect dashboard route
 function requireLogin(req, res, next) {
-  if (!req.session.user) return res.redirect('/login');
+  if (!req.session.user) return res.redirect('/landing');
   next();
 }
 router.get('/dashboard', requireLogin, (req, res) => {
