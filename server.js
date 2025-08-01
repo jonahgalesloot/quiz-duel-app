@@ -28,7 +28,7 @@ app.use(session({
   cookie: { httpOnly: true },
   store: MongoStore.create({
     mongoUrl: MONGO_URI,
-    dbName: 'quizduel',
+    dbName: 'quizzard',
     collectionName: 'sessions',
     ttl: 1000 * 60 * 60 * 24, // Optional: 1 day session expiry
   })

@@ -48,25 +48,36 @@ module.exports = function(usersCol, codesCol) {
   });
 
   // Login handler
-  router.post('/login', async (req, res) => {
-    const { username, password, recaptchaToken } = req.body;
-    if (!username || !password || !recaptchaToken) {
-      return res.status(400).json({ message: 'Missing fields' });
-    }
-    if (!await verifyCaptcha(recaptchaToken)) {
-      return res.status(400).json({ message: 'reCAPTCHA failed' });
-    }
-    const user = await usersCol.findOne({ username });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    if (!await bcrypt.compare(password, user.password)) {
-      return res.status(403).json({ message: 'Incorrect password' });
-    }
-    // set session
-    req.session.user = { username: user.username, role: user.role };
-    return res.sendStatus(200);
-  });
+router.post('/login', async (req, res) => {
+  const { username, password, recaptchaToken, remember } = req.body;
+  if (!username || !password || !recaptchaToken) {
+    return res.status(400).json({ message: 'Missing fields' });
+  }
+  if (!await verifyCaptcha(recaptchaToken)) {
+    return res.status(400).json({ message: 'reCAPTCHA failed' });
+  }
+  const user = await usersCol.findOne({ username });
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  if (!await bcrypt.compare(password, user.password)) {
+    return res.status(403).json({ message: 'Incorrect password' });
+  }
+
+  // ── HERE: configure session cookie based on the checkbox ──
+  if (remember === 'on') {
+    // persist for 30 days
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+  } else {
+    // session-only cookie (expires when browser/tab closes)
+    req.session.cookie.expires = false;
+  }
+
+  // set the logged-in user
+  req.session.user = { username: user.username, role: user.role };
+  return res.sendStatus(200);
+});
+
 
   // Logout handler
   router.post('/logout', (req, res) => {
