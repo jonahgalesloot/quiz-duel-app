@@ -58,6 +58,10 @@ MongoClient.connect(MONGO_URI)
     const authRouter = require('./routes/auth')(usersCol, codesCol);
     app.use('/', authRouter);
 
+    const questionSetsRouter = require('./routes/api/questionSets')(db);
+    app.use('/api/questionSets', questionSetsRouter);
+
+
     app.use('/', require('./routes/playSettings')(usersCol));
 
     // Start listening *after* routes are mounted
