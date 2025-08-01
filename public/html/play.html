@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Play – QuizDuel</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/play.css" />
+</head>
+<body>
+  <header id="navBar">
+    <a class="logo" href="/landing"><img src="/images/logo1.png" alt="QuizDuel Logo" /></a>
+    <nav>
+      <a class="link" href="/play">Play</a>
+      <a class="link" href="/logout" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+      <form id="logoutForm" action="/logout" method="post" style="display:none;"></form>
+    </nav>
+  </header>
+
+  <main class="play-container">
+    <!-- LEFT SETTINGS PANEL -->
+    <aside class="settings-panel">
+      <h2>Settings</h2>
+      <div class="settings-list">
+        <div class="setting">
+          <label for="numShort"># Short Answerlabel>
+          <input id="numShort" type="number" min="0" value="5" />
+        </div>
+        <div class="setting">
+          <label for="numLong"># Longanswerlabel>
+          <input id="numLong" type="number" min="0" value="2" />
+        </div>
+        <div class="setting">
+          <p>Select Question Sets:</p>
+          <div id="setsCheckboxes">
+            <!-- JS will populate checkbox list of available sets -->
+          </div>
+        </div>
+        <!-- You can add more settings here -->
+      </div>
+      <button id="saveSettings" class="button">Save Settings</button>
+    </aside>
+
+    <!-- RIGHT PREGAME BOARD -->
+    <section class="board-panel">
+      <!-- Opponent info top-right -->
+      <div class="player-info opponent-info">
+        <p>Opponent: <strong>???</strong></p>
+        <p>Elo: <strong>----</strong></p>
+      </div>
+
+      <!-- Board placeholder -->
+      <div class="board-placeholder">
+        <p>🏁 Game Interface Preview 🏁</p>
+      </div>
+
+      <!-- Your info bottom-left -->
+      <div class="player-info you-info">
+        <p>You: <strong>Username</strong></p>
+        <p>Elo: <strong>----</strong></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/play.js" defer></script>
+</body>
+</html>

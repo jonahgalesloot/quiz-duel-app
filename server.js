@@ -58,6 +58,8 @@ MongoClient.connect(MONGO_URI)
     const authRouter = require('./routes/auth')(usersCol, codesCol);
     app.use('/', authRouter);
 
+    app.use('/', require('./routes/playSettings')(usersCol));
+
     // Start listening *after* routes are mounted
     server.listen(PORT, () => {
       console.log(`🚀 Server listening on http://localhost:${PORT}`);
