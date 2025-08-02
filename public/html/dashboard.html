@@ -4,11 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dashboard – QuizDuel</title>
-  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
 </head>
 <body>
   <header id="navBar">
-    <a class="logo" href="/landing"><img src="/images/logo1.png" alt="QuizDuel Logo" /></a>
+    <a class="logo" href="/landing"><img src="../images/logo1.png" alt="QuizDuel Logo" /></a>
     <nav>
       <a class="link" href="/play">Play</a>
       <a class="link" href="/logout" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
@@ -16,21 +18,66 @@
     </nav>
   </header>
 
-  <main class="main">
-    <div class="detailsContainer">
-      <h1>Welcome, <span id="usernameDisplay">User</span></h1>
-      <p>Your current rating: <strong><span id="ratingDisplay">1200</span></strong></p>
-      <p>Choose an action below:</p>
-      <div>
-        <a class="button" href="/play">Start a Duel</a>
-        <a class="button" href="/leaderboard">View Leaderboard</a>
-        <a class="button" href="/profile">Your Profile</a>
+  <main class="dashboard-grid">
+    <!-- Player Info -->
+    <section class="player-info-box">
+      <div class="player-meta">
+        <div class="player-name" id="usernameDisplay">Player</div>
+        <div class="player-elo-label">Current Elo:</div>
+        <div class="player-elo" id="ratingDisplay">1200</div>
       </div>
-    </div>
+      <a class="button play-btn" href="/play">New Game</a>
+      <div class="settings-recap">
+        <div class="settings-title">Preferred settings:</div>
+        <div id="settingsRecap">Loading…</div>
+      </div>
+    </section>
+
+    <!-- Leaderboard -->
+    <section class="leaderboard-box">
+      <div class="leaderboard-title">This Week's Leaderboard</div>
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Place</th>
+            <th>Name</th>
+            <th>Elo</th>
+            <th>Wins</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody">
+          <tr><td>1</td><td>John</td><td>1320</td><td>12</td></tr>
+          <tr><td>2</td><td>Bob</td><td>1280</td><td>5</td></tr>
+          <tr><td>3</td><td>EEEEEEEE</td><td>1250</td><td>2</td></tr>
+          <tr><td>4</td><td>luchcheRobof</td><td>1210</td><td>1</td></tr>
+          <tr><td>5</td><td>Sophie</td><td>1205</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <div class="online-count">Currently Online: <span id="onlineCount">5</span></div>
+    </section>
+
+    <!-- Practice Section -->
+    <section class="practice-box">
+      <div class="practice-title">Practice Your Skills!</div>
+      <div class="practice-sets">
+        <div class="practice-set">
+          <div class="practice-img"></div>
+          <div class="practice-label">Set 1</div>
+        </div>
+        <div class="practice-set">
+          <div class="practice-img"></div>
+          <div class="practice-label">Set 2</div>
+        </div>
+        <div class="practice-set">
+          <div class="practice-img"></div>
+          <div class="practice-label">Set 3</div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
-    // Fetch real user info from API
+    // Fetch user info
     fetch('/api/user', { credentials: 'include' })
       .then(res => res.json())
       .then(user => {
@@ -40,6 +87,18 @@
       .catch(() => {
         document.getElementById('usernameDisplay').textContent = 'Player';
         document.getElementById('ratingDisplay').textContent = '1200';
+      });
+
+    // Fetch play settings
+    fetch('/play/settings', { credentials: 'include' })
+      .then(res => res.json())
+      .then(settings => {
+        const sets = (settings.questionSets || []).join(', ') || 'None';
+        document.getElementById('settingsRecap').textContent =
+          `Short: ${settings.numShort}, Long: ${settings.numLong}, Sets: ${sets}`;
+      })
+      .catch(() => {
+        document.getElementById('settingsRecap').textContent = 'Not available';
       });
   </script>
 </body>
