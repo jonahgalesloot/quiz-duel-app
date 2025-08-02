@@ -57,4 +57,12 @@ router.get(
   }
 );
 
+// Add placeholder routes for leaderboard and profile
+router.get('/leaderboard', requireLogin, (req, res) => {
+  res.send('<h1>Leaderboard coming soon!</h1>');
+});
+router.get('/profile', requireLogin, (req, res) => {
+  res.send('<h1>Profile page coming soon!</h1>');
+});
+
 module.exports = router;

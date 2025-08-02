@@ -6,8 +6,12 @@ module.exports = (db) => {
 
   // GET /api/questionSets
   router.get('/', async (req, res) => {
-    const sets = await col.find({}, { projection: { questions: 0 } }).toArray();
-    res.json(sets);
+    try {
+      const sets = await col.find({}, { projection: { questions: 0 } }).toArray();
+      res.json(sets);
+    } catch (err) {
+      res.status(500).json({ message: 'Server error' });
+    }
   });
 
   // (Optional) other endpoints: GET /:id, POST, PUT, DELETE...

@@ -30,9 +30,17 @@
   </main>
 
   <script>
-    // Placeholder: fetch real user info if you like
-    document.getElementById('usernameDisplay').textContent = sessionStorage.getItem('username') || 'Player';
-    document.getElementById('ratingDisplay').textContent = sessionStorage.getItem('rating') || '1200';
+    // Fetch real user info from API
+    fetch('/api/user', { credentials: 'include' })
+      .then(res => res.json())
+      .then(user => {
+        document.getElementById('usernameDisplay').textContent = user.username || 'Player';
+        document.getElementById('ratingDisplay').textContent = user.elo || '1200';
+      })
+      .catch(() => {
+        document.getElementById('usernameDisplay').textContent = 'Player';
+        document.getElementById('ratingDisplay').textContent = '1200';
+      });
   </script>
 </body>
 </html>

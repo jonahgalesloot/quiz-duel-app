@@ -8,6 +8,7 @@ const session       = require('express-session');
 const MongoStore    = require('connect-mongo');
 const cookieParser  = require('cookie-parser');
 const { MongoClient } = require('mongodb');
+const sharedsession = require("express-socket.io-session");
 
 const app     = express();
 const server  = http.createServer(app);
@@ -21,7 +22,7 @@ const RECAPTCHA_SITE = process.env.RECAPTCHA_SITE_KEY;
 // ————— Middleware —————
 app.use(express.json());
 app.use(cookieParser());
-app.use(session({
+const sessionMiddleware = session({
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
@@ -32,7 +33,17 @@ app.use(session({
     collectionName: 'sessions',
     ttl: 24 * 60 * 60  // 1 day in seconds
   })
-}));
+});
+
+// 2) Tell Express to use it
+app.use(sessionMiddleware);
+
+// 3) Tell Socket.io to share the same sessions
+io.use(
+  sharedsession(sessionMiddleware, {
+    autoSave: true  // any changes on socket.handshake.session get written back
+  })
+);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ————— Socket.io for reCAPTCHA key —————

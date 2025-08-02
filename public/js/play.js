@@ -38,12 +38,6 @@ socket.on('matched', ({ matchId, opponent }) => {
   window.location.href = `/duel/${matchId}`;
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadSettings();
-  document.getElementById('saveSettings')
-          .addEventListener('click', saveSettings);
-});
-
 async function loadSettings() {
   try {
     // 1) Fetch current user’s settings

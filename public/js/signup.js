@@ -46,6 +46,9 @@ function validate(){
   const form = document.getElementById('signupForm');
   const filled = [...form.querySelectorAll('input[required]')]
     .every(i => i.value.trim());
-  const ok = filled && grecaptcha.getResponse(widgetId).length>0;
+  // Password policy: at least 8 chars, 1 letter, 1 number
+  const pw = form.querySelector('input[name="password"]').value;
+  const pwOk = pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw);
+  const ok = filled && grecaptcha.getResponse(widgetId).length>0 && pwOk;
   form.querySelector('button').disabled = !ok;
 }
