@@ -5,35 +5,46 @@ html, body {
   height: 100%;
   width: 100%;
   font-family: sans-serif;
-  background-color: white;
-  color: black;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  overflow: hidden; /* Prevent scrollbars */
 }
 
 body * {
   box-sizing: border-box;
-  border: 1px solid black; /* Basic outlines for everything */
+  border: none;
 }
 
 /* Navbar */
 #navBar {
-  height: 60px;
+  height: 80px;
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  background-color: white;
+  padding: 0 36px;
+  background-color: var(--color-bg-alt);
+  box-shadow: 0 1px 6px var(--color-box-shadow);
 }
 
 .logo img {
-  height: 40px;
+  height: 56px;
+  filter: none;
 }
 
 /* Simple nav links */
 .link {
   text-decoration: none;
-  color: black;
-  padding: 6px 12px;
+  color: var(--color-text);
+  padding: 12px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  background: none;
+  font-size: 1.15rem;
+}
+.link:hover, .link:focus {
+  background: var(--color-accent);
+  color: var(--color-button-text);
 }
 
 /* Main content wrapper */
@@ -43,39 +54,80 @@ body * {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 60px; /* prevent overlap with navbar */
+  padding-top: 80px; /* prevent overlap with navbar */
+  background: transparent;
 }
 
 /* Container box for content */
 .detailsContainer {
   width: 100%;
-  max-width: 600px;
-  padding: 20px;
+  max-width: 700px;
+  padding: 48px 40px;
   text-align: center;
-  background-color: white;
+  background-color: var(--color-box-bg);
+  border-radius: 10px;
+  box-shadow: 0 2px 12px var(--color-box-shadow);
+  border: none;
+  font-size: 1.25rem;
 }
 
 /* Headings and paragraphs */
 h1, p {
   margin: 10px 0;
+  color: var(--color-text);
+  font-size: 2.2rem;
+}
+p {
+  font-size: 1.25rem;
 }
 
 /* Basic rectangular buttons */
 .button {
   display: inline-block;
-  padding: 10px 20px;
-  background: white;
-  color: black;
-  border: 1px solid black;
-  text-decoration: none;
-  cursor: pointer;
-  margin: 8px;
+  padding: 18px 0;
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+  border: none;
+  font-weight: 500;
+  box-shadow: 0 1px 4px var(--color-box-shadow);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  border-radius: 5px;
+  margin: 16px;
+  letter-spacing: 0.02em;
+  font-size: 1.25rem;
+  min-width: 180px;
 }
-.button:active {
-  background: black;
-  color: white;
+.button:active,
+.button:hover,
+.button:focus {
+  background: var(--color-accent-hover);
+  color: var(--color-button-text);
+  box-shadow: 0 2px 8px var(--color-box-shadow);
 }
-.button:hover {
-  background: black;
-  color: white;
+
+/* Inputs (for presignup/verify-email) */
+input[type="email"],
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  font-size: 1.15rem;
+  padding: 14px 12px;
+  margin: 14px 0;
+  border-radius: 6px;
+  border: 1px solid #bfc7d1;
+  background: var(--color-box-bg);
+  color: var(--color-text);
+  box-sizing: border-box;
+  transition: border 0.2s;
+}
+input[type="email"]:focus,
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border: 1.5px solid var(--color-accent);
+  outline: none;
+}
+
+/* Remove outlines for everything except focus-visible */
+*:focus:not(:focus-visible) {
+  outline: none;
 }

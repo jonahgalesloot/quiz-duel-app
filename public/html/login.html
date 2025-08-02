@@ -5,7 +5,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Login – QuizDuel</title>
-  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/login.css" />
 </head>
 <body>
   <header id="navBar">
@@ -17,21 +19,28 @@
 
   <main class="main">
     <div class="detailsContainer">
-      <h1>Login to Your Account</h1>
-      <form id="loginForm">
-    <input type="email" name="email" placeholder="Email" required />
-  <input name="password" type="password"  placeholder="Password" required />
-  <div class="g-recaptcha"></div>
-  <label>
-    <input type="checkbox" name="remember" />
-    Stay logged in
-  </label>
-  <button type="submit" class="button">Log In</button>
-</form>
+      <h1>Welcome Back!</h1>
+      <div class="sub-link">
+        <span>Don't have an account yet?<br>
+        <a href="/signup">Sign up instead</a></span>
+      </div>
+      <form id="loginForm" autocomplete="off">
+        <input type="email" name="email" placeholder="Email Address/ Username" required />
+        <input name="password" type="password"  placeholder="Password" required />
+        <div class="forgot-row">I forgot my password</div>
+        <div class="checkbox-row">
+          <input type="checkbox" name="remember" id="remember" />
+          <label for="remember">Keep me logged in</label>
+        </div>
+        <div class="g-recaptcha"></div>
+        <button type="submit" class="button">Submit</button>
+      </form>
+      <div id="msg"></div>
+    </div>
+  </main>
 
-<script src="/socket.io/socket.io.js"></script>
-<script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
-<script src="/js/login.js" defer></script>
-
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+  <script src="/js/login.js" defer></script>
 </body>
 </html>

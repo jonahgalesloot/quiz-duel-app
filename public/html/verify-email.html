@@ -2,16 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Verify Email – QuizDuel</title>
+  <title>Set Password – QuizDuel</title>
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/verify-email.css" />
 </head>
 <body>
-  <h1>Set Your Password</h1>
-  <form id="verifyForm">
-    <input type="password" name="password" placeholder="Password" required />
-    <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
-    <button type="submit">Complete Signup</button>
-  </form>
-  <div id="msg"></div>
+  <div id="navBar">
+    <a class="logo" href="/"><img src="../images/logo1.png" alt="QuizDuel Logo"></a>
+    <div>
+      <a class="link" href="/login">Login</a>
+      <a class="link" href="/signup">Sign Up</a>
+    </div>
+  </div>
+  <main class="main">
+    <section class="detailsContainer">
+      <h1>Set Your Password</h1>
+      <p>
+        <small>
+          Please choose a secure password to complete your signup.
+        </small>
+      </p>
+      <form id="verifyForm" autocomplete="off">
+        <input type="password" name="password" placeholder="Password" required />
+        <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
+        <button type="submit" class="button">Complete Signup</button>
+      </form>
+      <div id="msg"></div>
+    </section>
+  </main>
   <script>
     const params = new URLSearchParams(location.search);
     const token  = params.get('token');

@@ -3,15 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <title>Sign Up – QuizDuel</title>
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/presignup.css" />
 </head>
 <body>
-  <h1>Sign Up</h1>
-  <form id="presignupForm">
-    <input type="email" name="email" placeholder="School Email" required />
-    <input type="text" name="signupCode" placeholder="Signup Code" required />
-    <button type="submit">Send Verification Email</button>
-  </form>
-  <div id="msg"></div>
+  <div id="navBar">
+    <a class="logo" href="/"><img src="../images/logo1.png" alt="QuizDuel Logo"></a>
+    <div>
+      <a class="link" href="/login">Login</a>
+      <a class="link" href="/signup">Sign Up</a>
+    </div>
+  </div>
+  <main class="main">
+    <section class="detailsContainer">
+      <h1>Hello, new user!</h1>
+      <p>
+        <small>
+          Already have an account?
+          <a href="/login" class="inline-link">Login here</a>
+        </small>
+      </p>
+      <form id="presignupForm" autocomplete="off">
+        <div class="input-row">
+          <input type="email" name="email" placeholder="Email Address" required />
+        </div>
+        <div class="input-row">
+          <input type="text" name="signupCode" placeholder="Signup Code" required />
+          <span class="signup-tooltip-wrap">
+            <span class="signup-qmark" tabindex="0">?</span>
+            <span class="signup-tooltip">Get a signup code from your teacher to make an account</span>
+          </span>
+        </div>
+        <div class="g-recaptcha"></div>
+        <button type="submit" class="button">Submit</button>
+      </form>
+      <div id="msg"></div>
+    </section>
+  </main>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
+  <script src="/js/signup.js" defer></script>
   <script>
     document.getElementById('presignupForm').addEventListener('submit', async e => {
       e.preventDefault();
