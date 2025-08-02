@@ -43,12 +43,12 @@ module.exports = function(usersCol, codesCol, db) {
         return res.status(409).json({ message: 'Email already registered' });
       }
       // Clean up any previous pending signups
-      await db.collection('pendingSignups').deleteMany({ email });
+      await db.collection('signups').deleteMany({ email });
 
       // Create a new token entry
       const token = crypto.randomBytes(20).toString('hex');
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-      await db.collection('pendingSignups').insertOne({
+      await db.collection('signups').insertOne({
         email,
         signupCode,
         token,
@@ -88,7 +88,7 @@ module.exports = function(usersCol, codesCol, db) {
       }
 
       // Look up the pending signup
-      const pending = await db.collection('pendingSignups').findOne({ token });
+      const pending = await db.collection('signups').findOne({ token });
       if (!pending || pending.tokenExpires < new Date()) {
         return res.status(400).json({ message: 'Invalid or expired token' });
       }
@@ -109,7 +109,7 @@ module.exports = function(usersCol, codesCol, db) {
 
       // Consume the signup code and pending entry
       await codesCol.deleteOne({ code: pending.signupCode });
-      await db.collection('pendingSignups').deleteOne({ token });
+      await db.collection('signups').deleteOne({ token });
 
       return res.sendStatus(201);
     } catch (err) {

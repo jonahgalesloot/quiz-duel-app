@@ -62,7 +62,7 @@ MongoClient.connect(MONGO_URI)
     const codesCol = db.collection('codes');
 
     // Serve HTML pages
-    const pagesRouter = require('./routes/pages');
+    const pagesRouter = require('./routes/pages')((db));
     app.use('/', pagesRouter);
 
     // Auth routes (login/signup/logout)
