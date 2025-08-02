@@ -5,7 +5,14 @@
   <link rel="stylesheet" href="/css/play.css" />
 </head>
 <body>
-  <header id="navBar">…</header>
+  <header id="navBar">
+    <a class="logo" href="/landing"><img src="/images/logo1.png" alt="QuizDuel Logo" /></a>
+    <nav>
+      <a class="link" href="/play">Play</a>
+      <a class="link" href="/logout" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+      <form id="logoutForm" action="/logout" method="post" style="display:none;"></form>
+    </nav>
+  </header>
 
   <main class="play-container">
     <aside class="settings-panel" id="settingsPanel">

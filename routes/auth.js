@@ -57,8 +57,10 @@ module.exports = function(usersCol, codesCol) {
       await codesCol.deleteOne({ code: signupCode });
       const hash = await bcrypt.hash(password, 10);
       await usersCol.insertOne({ username, password: hash, role: 'student', elo: 800 });
+      console.log(`[AUTH] Signup: ${username}`);
       return res.sendStatus(201);
     } catch (err) {
+      console.log(`[AUTH] Signup error:`, err);
       res.status(500).json({ message: 'Server error' });
     }
   });
@@ -92,8 +94,10 @@ module.exports = function(usersCol, codesCol) {
 
       // set the logged-in user
       req.session.user = { username: user.username, role: user.role };
+      console.log(`[AUTH] Login: ${username}`);
       return res.sendStatus(200);
     } catch (err) {
+      console.log(`[AUTH] Login error:`, err);
       res.status(500).json({ message: 'Server error' });
     }
   });
@@ -101,8 +105,10 @@ module.exports = function(usersCol, codesCol) {
 
   // Logout handler
   router.post('/logout', (req, res) => {
+    const username = req.session.user && req.session.user.username;
     req.session.destroy(err => {
       res.clearCookie('connect.sid');
+      console.log(`[AUTH] Logout: ${username}`);
       res.sendStatus(200);
     });
   });
