@@ -56,7 +56,7 @@ module.exports = function(usersCol, codesCol) {
       // consume code
       await codesCol.deleteOne({ code: signupCode });
       const hash = await bcrypt.hash(password, 10);
-      await usersCol.insertOne({ username, password: hash, role: 'student' });
+      await usersCol.insertOne({ username, password: hash, role: 'student', elo: 800 });
       return res.sendStatus(201);
     } catch (err) {
       res.status(500).json({ message: 'Server error' });
