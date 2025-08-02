@@ -4,8 +4,8 @@ const path          = require('path');
 const express       = require('express');
 const http          = require('http');
 const socketIo      = require('socket.io');
-const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const session       = require('express-session');
+const MongoStore    = require('connect-mongo');
 const cookieParser  = require('cookie-parser');
 const { MongoClient } = require('mongodb');
 
@@ -13,10 +13,10 @@ const app     = express();
 const server  = http.createServer(app);
 const io      = socketIo(server);
 
-const PORT            = process.env.PORT || 3000;
-const MONGO_URI       = process.env.MONGO_URI;
-const SESSION_SECRET  = process.env.SESSION_SECRET;
-const RECAPTCHA_SITE  = process.env.RECAPTCHA_SITE_KEY;
+const PORT           = process.env.PORT || 3000;
+const MONGO_URI      = process.env.MONGO_URI;
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const RECAPTCHA_SITE = process.env.RECAPTCHA_SITE_KEY;
 
 // ————— Middleware —————
 app.use(express.json());
@@ -30,7 +30,7 @@ app.use(session({
     mongoUrl: MONGO_URI,
     dbName: 'quizzard',
     collectionName: 'sessions',
-    ttl: 1000 * 60 * 60 * 24, // Optional: 1 day session expiry
+    ttl: 24 * 60 * 60  // 1 day in seconds
   })
 }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -50,24 +50,30 @@ MongoClient.connect(MONGO_URI)
     const usersCol = db.collection('users');
     const codesCol = db.collection('codes');
 
-    // Mount page routes
+    // Serve HTML pages
     const pagesRouter = require('./routes/pages');
     app.use('/', pagesRouter);
 
-    // Mount auth routes, injecting the collections
+    // Auth routes (login/signup/logout)
     const authRouter = require('./routes/auth')(usersCol, codesCol);
     app.use('/', authRouter);
 
+    // Question‐sets API
     const questionSetsRouter = require('./routes/api/questionSets')(db);
     app.use('/api/questionSets', questionSetsRouter);
 
+    // User info API (username + elo)
+    const userRouter = require('./routes/api/user')(usersCol);
+    app.use('/api/user', userRouter);
 
-    app.use('/', require('./routes/playSettings')(usersCol));
+    // Play settings (stored on user.playSettings)
+    const playSettingsRouter = require('./routes/playSettings')(usersCol);
+    app.use('/', playSettingsRouter);
 
+    // Socket.io matchmaking, chat, etc.
     require('./routes/socket')(io, db, usersCol);
 
-
-    // Start listening *after* routes are mounted
+    // Start server only after all routes are mounted
     server.listen(PORT, () => {
       console.log(`🚀 Server listening on http://localhost:${PORT}`);
     });

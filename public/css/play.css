@@ -58,6 +58,7 @@
 
 /* Placeholder “board” */
 .board-placeholder {
+  position: relative ;
   width: 80%;
   height: 80%;
   border: 2px dashed #aaa;
@@ -97,3 +98,9 @@
   margin-top: 12px;
 }
 
+
+#joinQueue {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+}

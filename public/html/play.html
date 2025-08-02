@@ -9,14 +9,28 @@
 
   <main class="play-container">
     <aside class="settings-panel" id="settingsPanel">
-      <h2>Settings</h2>
-      <div class="settings-list">…</div>
-      <div class="actions">
-        <button id="saveSettings" class="button">Save Settings</button>
-        <!-- New: queue button -->
-        
-      </div>
-    </aside>
+  <h2>Settings</h2>
+  <div class="settings-list">
+    <div class="setting">
+      <label for="numShort"># Short Questions</label>
+      <input id="numShort" type="number" min="0" value="5" />
+    </div>
+    <div class="setting">
+      <label for="numLong"># Long Questions</label>
+      <input id="numLong" type="number" min="0" value="2" />
+    </div>
+    <div class="setting">
+      <p>Select Question Sets:</p>
+      <div id="setsCheckboxes"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="saveSettings" class="button">Save Settings</button>
+    
+  </div>
+</aside>
+
 
     <section class="board-panel">
       <div class="player-info opponent-info">
