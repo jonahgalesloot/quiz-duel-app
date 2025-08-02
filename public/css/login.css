@@ -4,33 +4,34 @@ body {
 }
 
 .main {
-  min-height: 80vh;
+  min-height: calc(100vh - 80px);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
 }
 
 .detailsContainer {
   background: rgba(246, 247, 250, 0.96);
   border-radius: 10px;
   box-shadow: 0 2px 12px var(--color-box-shadow);
-  padding: 56px 48px;
-  max-width: 540px;
-  margin: 48px auto;
+  padding: 32px 20px;
+  margin: 0 auto;
+  max-width: 420px;
   border: none;
   text-align: center;
 }
 
 .detailsContainer h1 {
-  font-size: 2.6rem;
-  margin-bottom: 18px;
+  font-size: 2.1rem;
+  margin-bottom: 14px;
   color: var(--color-accent);
   font-weight: 600;
 }
 
 .detailsContainer .sub-link {
-  font-size: 1.1rem;
-  margin-bottom: 24px;
+  font-size: 1rem;
+  margin-bottom: 14px;
   display: block;
 }
 
@@ -44,8 +45,8 @@ body {
 input[type="email"],
 input[type="password"] {
   width: 100%;
-  font-size: 1.25rem;
-  padding: 18px 16px;
+  font-size: 1.1rem;
+  padding: 12px 10px;
   border-radius: 7px;
   border: 2.5px solid #111;
   background: var(--color-box-bg);
@@ -54,8 +55,8 @@ input[type="password"] {
   transition: border 0.2s;
   font-weight: 500;
   display: block;
-  height: 56px;
-  margin: 0 0 22px 0;
+  height: 44px;
+  margin: 0 0 14px 0;
 }
 
 input[type="email"]:focus,
@@ -67,15 +68,15 @@ input[type="password"]:focus {
 .forgot-row {
   text-align: left;
   font-size: 1.05rem;
-  margin: -14px 0 18px 2px;
+  margin: -8px 0 10px 2px;
   color: #444;
 }
 
 .checkbox-row {
   display: flex;
   align-items: center;
-  margin-bottom: 22px;
-  font-size: 1.15rem;
+  margin-bottom: 14px;
+  font-size: 1rem;
   text-align: left;
   gap: 12px;
 }
@@ -89,26 +90,26 @@ input[type="password"]:focus {
 
 .button {
   width: 100%;
-  font-size: 1.25rem;
-  padding: 18px 0;
-  margin: 16px 0 0 0;
+  font-size: 1.1rem;
+  padding: 14px 0;
+  margin: 10px 0 0 0;
 }
 
 .g-recaptcha {
-  margin: 18px 0 0 0;
+  margin: 10px 0 0 0;
   display: flex;
   justify-content: center;
 }
 
 #msg {
-  margin-top: 18px;
-  font-size: 1.1rem;
+  margin-top: 10px;
+  font-size: 1rem;
   color: var(--color-accent);
 }
 
 @media (max-width: 600px) {
   .detailsContainer {
-    padding: 18px 4px;
+    padding: 10px 2px;
     max-width: 98vw;
   }
   .main {
@@ -116,13 +117,13 @@ input[type="password"]:focus {
   }
   input[type="email"],
   input[type="password"] {
-    font-size: 1.1rem;
-    min-height: 44px;
-    height: 44px;
-    padding: 10px 8px;
+    font-size: 1rem;
+    min-height: 36px;
+    height: 36px;
+    padding: 8px 6px;
   }
   .checkbox-row input[type="checkbox"] {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
   }
 }
