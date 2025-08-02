@@ -1,4 +1,3 @@
-// login.js
 const socket = io();
 let widgetId;
 
@@ -26,11 +25,12 @@ function initForm(){
       credentials: 'include'
     });
 
+    const msg = document.getElementById('msg');
     if (res.ok) {
       window.location = '/dashboard';
     } else {
       const err = await res.json();
-      alert(err.message);
+      msg.textContent = err.message;
       form.reset();
       grecaptcha.reset(widgetId);
     }
@@ -45,7 +45,6 @@ function validate(){
   const form = document.getElementById('loginForm');
   const filled = [...form.querySelectorAll('input[required]')]
     .every(i => i.value.trim());
-  // Password policy: at least 8 chars, 1 letter, 1 number
   const pw = form.querySelector('input[name="password"]').value;
   const pwOk = pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw);
   const ok = filled && grecaptcha.getResponse(widgetId).length>0 && pwOk;

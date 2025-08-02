@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Verify Email – QuizDuel</title>
+</head>
+<body>
+  <h1>Set Your Password</h1>
+  <form id="verifyForm">
+    <input type="password" name="password" placeholder="Password" required />
+    <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
+    <button type="submit">Complete Signup</button>
+  </form>
+  <div id="msg"></div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const token  = params.get('token');
+    document.getElementById('verifyForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      data.token = token;
+      const res = await fetch('/verify-email', {
+        method: 'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      const msg = document.getElementById('msg');
+      if (res.ok) location = '/login';
+      else msg.textContent = (await res.json()).message;
+    });
+  </script>
+</body>
+</html>

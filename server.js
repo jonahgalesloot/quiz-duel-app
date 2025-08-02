@@ -66,7 +66,7 @@ MongoClient.connect(MONGO_URI)
     app.use('/', pagesRouter);
 
     // Auth routes (login/signup/logout)
-    const authRouter = require('./routes/auth')(usersCol, codesCol);
+    const authRouter = require('./routes/auth')(usersCol, codesCol, db);
     app.use('/', authRouter);
 
     // Question‐sets API

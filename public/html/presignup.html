@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign Up – QuizDuel</title>
+</head>
+<body>
+  <h1>Sign Up</h1>
+  <form id="presignupForm">
+    <input type="email" name="email" placeholder="School Email" required />
+    <input type="text" name="signupCode" placeholder="Signup Code" required />
+    <button type="submit">Send Verification Email</button>
+  </form>
+  <div id="msg"></div>
+  <script>
+    document.getElementById('presignupForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      const res = await fetch('/presignup', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(data)
+      });
+      const msg = document.getElementById('msg');
+      if (res.ok) {
+        msg.textContent = "Check your email for the verification link.";
+      } else {
+        msg.textContent = (await res.json()).message;
+      }
+    });
+  </script>
+</body>
+</html>

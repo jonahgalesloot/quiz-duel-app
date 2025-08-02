@@ -14,8 +14,8 @@ module.exports = function(usersCol) {
   // GET /play/settings
   router.get('/play/settings', async (req, res) => {
     try {
-      const username = req.session.user.username;
-      let user = await usersCol.findOne({ username });
+      const email = req.session.user.email;
+      let user = await usersCol.findOne({ email });
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
@@ -28,7 +28,7 @@ module.exports = function(usersCol) {
       const missingKeys = Object.keys(DEFAULTS).filter(k => !(k in existing));
       if (missingKeys.length) {
         await usersCol.updateOne(
-          { username },
+          { email },
           { $set: { playSettings: merged } }
         );
       }
@@ -42,14 +42,14 @@ module.exports = function(usersCol) {
   // POST /play/settings
   router.post('/play/settings', async (req, res) => {
     try {
-      const username = req.session.user.username;
+      const email = req.session.user.email;
       const incoming = req.body;
 
       // (Optional) You might validate that incoming only has allowed keys
       const toStore = { ...DEFAULTS, ...incoming };
 
       await usersCol.updateOne(
-        { username },
+        { email },
         { $set: { playSettings: toStore } }
       );
 

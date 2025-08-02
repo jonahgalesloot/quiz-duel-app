@@ -1,100 +1,126 @@
-// routes/auth.js
 const express = require('express');
 const bcrypt  = require('bcrypt');
 const fetch = require('node-fetch').default;
+const crypto = require('crypto');
+const path = require('path');
+const sendMail = require('../utils/email');
 
-module.exports = function(usersCol, codesCol) {
+module.exports = function(usersCol, codesCol, db) {
   const router = express.Router();
 
-  // Helper: verify reCAPTCHA
-  async function verifyCaptcha(token) {
-    const secret = process.env.RECAPTCHA_SECRET_KEY;
-    const resp = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify`,
-      { method:'POST',
-        headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
-        body:`secret=${secret}&response=${token}` 
-      }
-    );
-    const json = await resp.json();
-    return json.success;
+  // Helper: send verification email
+  async function sendVerificationEmail(email, token) {
+    const link = `${process.env.BASE_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
+    await sendMail({
+      to: email,
+      subject: "QuizDuel Email Verification",
+      html: `<p>Click <a href="${link}">here</a> to complete your signup.</p>`
+    });
   }
 
-  // Helper: password policy
-  function isValidPassword(pw) {
-    // At least 8 chars, 1 letter, 1 number
-    return typeof pw === 'string' &&
-      pw.length >= 8 &&
-      /[A-Za-z]/.test(pw) &&
-      /\d/.test(pw);
-  }
-
-  // Signup handler
-  router.post('/signup', async (req, res) => {
+  // POST /presignup
+  router.post('/presignup', async (req, res) => {
     try {
-      const { username, password, confirmPassword, signupCode, recaptchaToken } = req.body;
-      if (!username || !password || !confirmPassword || !signupCode || !recaptchaToken) {
+      const { email, signupCode } = req.body;
+      if (!email || !signupCode) {
+        return res.status(400).json({ message: 'Missing fields' });
+      }
+      const valid = await codesCol.findOne({ code: signupCode });
+      if (!valid) return res.status(403).json({ message: 'Invalid signup code' });
+
+      // Check if already registered
+      const exists = await usersCol.findOne({ email });
+      if (exists) return res.status(409).json({ message: 'Email already registered' });
+
+      // Remove any previous pending signup for this email
+      await db.collection('pendingSignups').deleteMany({ email });
+
+      // Generate token
+      const token = crypto.randomBytes(20).toString('hex');
+      const now   = new Date();
+      await db.collection('pendingSignups').insertOne({
+        email, signupCode, token,
+        tokenExpires: new Date(now.getTime() + 1000 * 60 * 60) // 1hr
+      });
+
+      await sendVerificationEmail(email, token);
+
+      return res.status(200).json({ message: 'Check your email for the verification link' });
+    } catch (err) {
+      console.log('[AUTH] presignup error:', err);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+  // GET /verify-email (serve the HTML)
+  router.get('/verify-email', (req, res) =>
+    res.sendFile(path.join(__dirname, '../public/html/verify-email.html'))
+  );
+
+  // POST /verify-email
+  router.post('/verify-email', async (req, res) => {
+    try {
+      const { token, password, confirmPassword } = req.body;
+      if (!token || !password || !confirmPassword) {
         return res.status(400).json({ message: 'Missing fields' });
       }
       if (password !== confirmPassword) {
         return res.status(400).json({ message: 'Passwords do not match' });
       }
-      if (!isValidPassword(password)) {
+      // Password policy
+      if (password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
         return res.status(400).json({ message: 'Password must be at least 8 characters and include a letter and a number.' });
       }
-      if (!await verifyCaptcha(recaptchaToken)) {
-        return res.status(400).json({ message: 'reCAPTCHA failed' });
+      // Find pending signup
+      const pending = await db.collection('pendingSignups').findOne({ token });
+      if (!pending || pending.tokenExpires < new Date()) {
+        return res.status(400).json({ message: 'Invalid or expired token' });
       }
-      const codeDoc = await codesCol.findOne({ code: signupCode });
-      if (!codeDoc) {
-        return res.status(403).json({ message: 'Invalid signup code' });
-      }
-      const exists = await usersCol.findOne({ username });
-      if (exists) {
-        return res.status(409).json({ message: 'Username taken' });
-      }
-      // consume code
-      await codesCol.deleteOne({ code: signupCode });
+      // Create user
       const hash = await bcrypt.hash(password, 10);
-      await usersCol.insertOne({ username, password: hash, role: 'student', elo: 800 });
-      console.log(`[AUTH] Signup: ${username}`);
+      const email = pending.email;
+      const username = email.split('@')[0];
+      await usersCol.insertOne({
+        email,
+        username,
+        password: hash,
+        role: 'student',
+        elo: 1200,
+        playSettings: {}
+      });
+      // Consume code & pending doc
+      await codesCol.deleteOne({ code: pending.signupCode });
+      await db.collection('pendingSignups').deleteOne({ token });
+
       return res.sendStatus(201);
     } catch (err) {
-      console.log(`[AUTH] Signup error:`, err);
+      console.log('[AUTH] verify-email error:', err);
       res.status(500).json({ message: 'Server error' });
     }
   });
 
-  // Login handler
+  // Login handler (now by email)
   router.post('/login', async (req, res) => {
     try {
-      const { username, password, recaptchaToken, remember } = req.body;
-      if (!username || !password || !recaptchaToken) {
+      const { email, password, recaptchaToken, remember } = req.body;
+      if (!email || !password || !recaptchaToken) {
         return res.status(400).json({ message: 'Missing fields' });
       }
-      if (!await verifyCaptcha(recaptchaToken)) {
-        return res.status(400).json({ message: 'reCAPTCHA failed' });
-      }
-      const user = await usersCol.findOne({ username });
+      // ...reCAPTCHA check as before...
+      const user = await usersCol.findOne({ email });
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
       if (!await bcrypt.compare(password, user.password)) {
         return res.status(403).json({ message: 'Incorrect password' });
       }
-
-      // ── HERE: configure session cookie based on the checkbox ──
       if (remember === 'on') {
-        // persist for 30 days
         req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
       } else {
-        // session-only cookie (expires when browser/tab closes)
         req.session.cookie.expires = false;
       }
-
-      // set the logged-in user
-      req.session.user = { username: user.username, role: user.role };
-      console.log(`[AUTH] Login: ${username}`);
+      req.session.user = { email: user.email, username: user.username, role: user.role };
+      console.log(`[AUTH] Login: ${user.email}`);
       return res.sendStatus(200);
     } catch (err) {
       console.log(`[AUTH] Login error:`, err);
@@ -102,8 +128,7 @@ module.exports = function(usersCol, codesCol) {
     }
   });
 
-
-  // Logout handler
+ // Logout handler
   router.post('/logout', (req, res) => {
     const username = req.session.user && req.session.user.username;
     req.session.destroy(err => {

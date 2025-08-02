@@ -48,8 +48,8 @@ module.exports = function(io, db, usersCol) {
         let youDoc, oppDoc;
         try {
           [youDoc, oppDoc] = await Promise.all([
-            usersCol.findOne({ username: user.username }, { projection: { username:1, elo:1 } }),
-            usersCol.findOne({ username: otherUser.username }, { projection: { username:1, elo:1 } })
+            usersCol.findOne({ email: user.email }, { projection: { username:1, elo:1 } }),
+            usersCol.findOne({ email: otherUser.email }, { projection: { username:1, elo:1 } })
           ]);
         } catch (e) {
           matchmakingLock = false;
@@ -89,6 +89,7 @@ module.exports = function(io, db, usersCol) {
       if (!players) return;
       const oppUsername = players.find(u => u !== username);
       if (!oppUsername) return;
+      // Find opponent by username for display, but use email for DB lookup if available
       usersCol.findOne({ username: oppUsername }, { projection: { username:1, elo:1 } })
         .then(oppDoc => {
           if (!oppDoc) return;

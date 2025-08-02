@@ -40,7 +40,7 @@ router.get('/login', (req, res) => {
 });
 router.get('/signup', (req, res) => {
   console.log(`[PAGES] GET /signup`);
-  res.sendFile(path.join(__dirname, '../public/html/signup.html'));
+  res.sendFile(path.join(__dirname, '../public/html/presignup.html'));
 });
 
 function requireLogin(req, res, next) {
