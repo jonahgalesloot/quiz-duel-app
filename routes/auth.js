@@ -10,7 +10,10 @@ module.exports = function(usersCol, codesCol, db) {
 
   // Helper: send verification email
   async function sendVerificationEmail(email, token) {
-    const link = `${process.env.BASE_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
+    const protocol = req.protocol;                  // “http” or “https”
+    const host     = req.get('host');               // “yourapp.onrender.com” or localhost:3000
+    const baseUrl  = `${protocol}://${host}`;
+    const link = `${baseUrl}/verify-email?token=${token}`;
     await sendMail({
       to: email,
       subject: "Quizzard Email Verification",
