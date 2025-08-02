@@ -64,6 +64,9 @@ MongoClient.connect(MONGO_URI)
 
     app.use('/', require('./routes/playSettings')(usersCol));
 
+    require('./routes/socket')(io, db, usersCol);
+
+
     // Start listening *after* routes are mounted
     server.listen(PORT, () => {
       console.log(`🚀 Server listening on http://localhost:${PORT}`);

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  …
+  <link rel="stylesheet" href="/css/play.css" />
+</head>
+<body>
+  <header id="navBar">…</header>
+
+  <main class="play-container">
+    <!-- CHAT PANEL -->
+    <aside class="settings-panel">
+      <h2>Chat & Log</h2>
+      <div id="chatLog" class="settings-list"></div>
+      <div class="actions">
+        <input id="chatInput" type="text" placeholder="Type…"/>
+        <button id="sendChat" class="button">Send</button>
+      </div>
+    </aside>
+
+    <!-- GAME BOARD PANEL -->
+    <section class="board-panel">
+      <div class="player-info opponent-info">
+        Opponent: <strong id="oppName">?</strong>  
+        Elo: <strong id="oppElo">?</strong>
+      </div>
+      <div class="board-placeholder">🎯 Game Area 🎯</div>
+      <div class="player-info you-info">
+        You: <strong id="youName">?</strong>  
+        Elo: <strong id="youElo">?</strong>
+      </div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/duel.js" defer></script>
+</body>
+</html>

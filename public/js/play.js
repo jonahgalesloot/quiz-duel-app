@@ -1,4 +1,42 @@
 // public/js/play.js
+const socket = io();
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadUserInfo();
+  loadSettings();
+  document.getElementById('saveSettings')
+          .addEventListener('click', saveSettings);
+  document.getElementById('joinQueue')
+          .addEventListener('click', joinQueue);
+});
+
+async function loadUserInfo() {
+  const res = await fetch('/api/user', { credentials:'include' });
+  const { username, elo } = await res.json();
+  document.getElementById('youName').textContent = username;
+  document.getElementById('youElo').textContent  = elo;
+}
+
+function disableSettingsPanel(disabled = true) {
+  document.getElementById('settingsPanel')
+          .classList.toggle('disabled', disabled);
+}
+
+// … existing loadSettings() & saveSettings() here …
+
+function joinQueue() {
+  disableSettingsPanel(true);
+  socket.emit('joinMatchmaking');  
+}
+
+// Server tells you when a match is found
+socket.on('matched', ({ matchId, opponent }) => {
+  // opponent = { username, elo }
+  document.getElementById('oppName').textContent = opponent.username;
+  document.getElementById('oppElo').textContent  = opponent.elo;
+  // redirect into the duel “room”
+  window.location.href = `/duel/${matchId}`;
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   loadSettings();

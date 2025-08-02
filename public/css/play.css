@@ -86,3 +86,14 @@
   bottom: 20px;
   left: 20px;
 }
+
+.settings-panel.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
