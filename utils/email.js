@@ -1,32 +1,34 @@
+// utils/email.js
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 
 console.log('[EMAIL] Initializing transporter...');
+
 const transporter = nodemailer.createTransport({
-  host: 'smtp.mailgun.org',
-  port: 587,
+  host: process.env.MAIL_HOST,        // e.g. "smtp-relay.sendinblue.com"
+  port: Number(process.env.MAIL_PORT),// e.g. 587
+  secure: false,                      // true if you use port 465
   auth: {
-    user: process.env.MAILGUN_USER,
-    pass: process.env.MAILGUN_PASS
+    user: process.env.MAIL_USER,      // your Brevo SMTP login
+    pass: process.env.MAIL_PASS       // your Brevo SMTP key
   }
 });
 
 async function sendMail({ to, subject, html }) {
-  console.log('[EMAIL] Preparing to send email...');
-  console.log('[EMAIL] From:', process.env.MAILGUN_FROM);
+  console.log('[EMAIL] Preparing to send email…');
+  console.log('[EMAIL] From:', process.env.MAIL_FROM);
   console.log('[EMAIL] To:', to);
   console.log('[EMAIL] Subject:', subject);
-  // Optionally log the HTML or a snippet
   console.log('[EMAIL] HTML snippet:', html && html.slice(0, 100) + (html.length > 100 ? '...' : ''));
 
   try {
     const info = await transporter.sendMail({
-      from: process.env.MAILGUN_FROM,
+      from: process.env.MAIL_FROM,
       to,
       subject,
       html
     });
-    console.log('[EMAIL] Email sent:', info);
+    console.log('[EMAIL] Email sent:', info.messageId);
     return info;
   } catch (err) {
     console.error('[EMAIL] Error sending email:', err);

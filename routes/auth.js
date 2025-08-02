@@ -13,7 +13,7 @@ module.exports = function(usersCol, codesCol, db) {
     const link = `${process.env.BASE_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
     await sendMail({
       to: email,
-      subject: "QuizDuel Email Verification",
+      subject: "Quizzard Email Verification",
       html: `<p>Click <a href="${link}">here</a> to complete your signup.</p>`
     });
   }
