@@ -1,0 +1,32 @@
+<form id="avatarForm" enctype="multipart/form-data">
+  <label>Upload Avatar:</label>
+  <input type="file" name="avatar" accept="image/*" required>
+  <button type="submit">Upload</button>
+</form>
+
+<script>
+document.getElementById('avatarForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+
+  const res = await fetch('/api/avatar/upload', {
+    method: 'POST',
+    credentials: 'include',
+    body: data
+  });
+  if (res.ok) {
+    const { avatarUrl } = await res.json();
+    alert('Uploaded! New URL: ' + avatarUrl);
+    // Optionally update the src of <img id="profile-pic">
+    document.getElementById('profile-pic').src = avatarUrl;
+  } else {
+    alert((await res.json()).message);
+  }
+});
+</script>
+
+<img id="profile-pic"
+     src="/path/to/default.png"
+     alt="Your avatar"
+     style="width:144px;height:144px;border-radius:50%;" />

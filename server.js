@@ -81,6 +81,12 @@ MongoClient.connect(MONGO_URI)
     const playSettingsRouter = require('./routes/playSettings')(usersCol);
     app.use('/', playSettingsRouter);
 
+    const avatarUpload = require('./routes/api/avatar-upload')(usersCol);
+    app.use('/api/avatar-upload', avatarUpload);
+
+    const avatarDownload = require('./routes/api/avatar-download')(usersCol);
+    app.use('/api/avatar-download', avatarDownload);
+
     // Socket.io matchmaking, chat, etc.
     require('./routes/socket')(io, db, usersCol);
 
