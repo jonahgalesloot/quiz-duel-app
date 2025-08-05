@@ -1,4 +1,4 @@
-// routes/avatar.js
+// routes/api/auth/avatar-upload.js
 const express = require('express');
 const multer  = require('multer');
 const Sharp   = require('sharp');
@@ -14,9 +14,9 @@ module.exports = function(usersCol) {
     applicationKey:   process.env.B2_APP_KEY
   });
 
-  // POST /api/avatar/upload
+  // POST /api/auth/avatar-upload
   // form-data: { avatar: <file> }
-  router.post('/upload', upload.single('avatar'), async (req, res) => {
+  router.post('/api/auth/avatar-upload', upload.single('avatar'), async (req, res) => {
     try {
       // 1) Auth check
       const user = req.session.user;
@@ -65,4 +65,4 @@ module.exports = function(usersCol) {
   });
 
   return router;
-};
+}; 

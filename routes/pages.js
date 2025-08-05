@@ -1,9 +1,8 @@
 // routes/pages.js
 const path    = require('path');
 const express = require('express');
-const { activeMatches } = require('./socket');
 
-module.exports = function(db) {
+module.exports = function(db, getActiveMatches) {
   const router = express.Router();
   const pendingCol = db.collection('pendingSignups');
 
@@ -23,6 +22,7 @@ module.exports = function(db) {
       console.log(`[PAGES] Deny /duel/${matchId} for user=${user}`);
       return res.redirect('/landing');
     }
+    const activeMatches = getActiveMatches ? getActiveMatches() : {};
     const players = activeMatches[matchId] || [];
     if (!players.includes(user)) {
       console.warn(`[PAGES] Access denied to match ${matchId} for user ${user}. Players:`, players);
@@ -81,6 +81,7 @@ module.exports = function(db) {
   router.get('/play', requireLogin, (req, res) => {
     const username = req.session.user.username;
     // If already in a match, redirect to that duel
+    const activeMatches = getActiveMatches ? getActiveMatches() : {};
     for (const [id, players] of Object.entries(activeMatches)) {
       if (players.includes(username)) {
         console.log(`[PAGES] ${username} already in match ${id}, redirect to /duel/${id}`);

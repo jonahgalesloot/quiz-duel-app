@@ -1,4 +1,4 @@
-// routes/api/ai-grade.js
+// routes/api/game/ai-grade.js
 const express = require('express');
 const OpenAI = require('openai');
 require('dotenv').config();
@@ -6,9 +6,9 @@ require('dotenv').config();
 const router = express.Router();
 const client = new OpenAI({ apiKey: process.env.GITHUB_TOKEN });
 
-// POST /api/ai-grade
+// POST /api/game/ai-grade
 // { answer, rubric, prompt }
-router.post('/', async (req, res) => {
+router.post('/api/game/ai-grade', async (req, res) => {
   const { answer, rubric, prompt } = req.body;
   if (!answer || !rubric || !prompt) return res.status(400).json({ message: 'Missing fields' });
   try {
@@ -30,4 +30,4 @@ router.post('/', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = router; 

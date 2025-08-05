@@ -30,7 +30,7 @@ async function submitAnswer(matchId, username, answer) {
   } else {
     // Short/long answer: call AI grading API
     try {
-      const res = await fetch('http://localhost:3000/api/ai-grade', {
+      const res = await fetch('http://localhost:3000/api/game/ai-grade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

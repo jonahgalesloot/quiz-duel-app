@@ -1,11 +1,11 @@
-// routes/api/game-questions.js
+// routes/api/game/questions.js
 const express = require('express');
 module.exports = (db) => {
   const router = express.Router();
   const col = db.collection('sets');
 
   // GET /api/game/questions
-  router.get('/', async (req, res) => {
+  router.get('/api/game/questions', async (req, res) => {
     try {
       const set = await col.findOne({}, { projection: { questions: 1 } });
       res.json(set.questions || []);
@@ -15,4 +15,4 @@ module.exports = (db) => {
   });
 
   return router;
-};
+}; 

@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loadUserInfo() {
-  const res = await fetch('/api/user', { credentials:'include' });
+  const res = await fetch('/api/auth/user', { credentials:'include' });
   const { username, elo } = await res.json();
   document.getElementById('youName').textContent = username;
   document.getElementById('youElo').textContent  = elo;
@@ -30,25 +30,35 @@ function joinQueue() {
 }
 
 // Server tells you when a match is found
-socket.on('matched', ({ matchId, opponent }) => {
-  // opponent = { username, elo }
-  document.getElementById('oppName').textContent = opponent.username;
-  document.getElementById('oppElo').textContent  = opponent.elo;
-  // redirect into the duel “room”
+socket.on('matchStarted', ({ matchId, players, questions }) => {
+  console.log('Match started:', matchId, players);
+  // Store match data for the duel page
+  sessionStorage.setItem('currentMatch', JSON.stringify({ matchId, players, questions }));
+});
+
+// Server tells you to redirect to the match
+socket.on('redirectToMatch', ({ matchId }) => {
+  console.log('Redirecting to match:', matchId);
   window.location.href = `/duel/${matchId}`;
+});
+
+// Handle system messages
+socket.on('systemLog', (message) => {
+  console.log('System:', message);
+  // You could display this in the UI if needed
 });
 
 async function loadSettings() {
   try {
-    // 1) Fetch current user’s settings
-    const res = await fetch('/play/settings', {
+    // 1) Fetch current user's settings
+    const res = await fetch('/api/settings/play', {
       credentials: 'include'
     });
     if (!res.ok) throw new Error('Failed to load settings');
     const { numShort, numLong, questionSets } = await res.json();
 
     // 2) Fetch all available question sets
-    const setsRes = await fetch('/api/questionSets', {
+    const setsRes = await fetch('/api/game/questionSets', {
       credentials: 'include'
     });
     if (!setsRes.ok) throw new Error('Failed to load question sets');
@@ -92,7 +102,7 @@ async function saveSettings() {
   const payload = { numShort, numLong, questionSets: sets };
 
   try {
-    const res = await fetch('/play/settings', {
+    const res = await fetch('/api/settings/play', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

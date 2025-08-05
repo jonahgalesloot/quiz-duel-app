@@ -1,4 +1,4 @@
-// routes/playSettings.js
+// routes/api/settings/playSettings.js
 const express = require('express');
 
 module.exports = function(usersCol) {
@@ -11,8 +11,8 @@ module.exports = function(usersCol) {
     questionSets: []
   };
 
-  // GET /play/settings
-  router.get('/play/settings', async (req, res) => {
+  // GET /api/settings/play
+  router.get('/api/settings/play', async (req, res) => {
     try {
       const email = req.session.user.email;
       let user = await usersCol.findOne({ email });
@@ -39,8 +39,8 @@ module.exports = function(usersCol) {
     }
   });
 
-  // POST /play/settings
-  router.post('/play/settings', async (req, res) => {
+  // POST /api/settings/play
+  router.post('/api/settings/play', async (req, res) => {
     try {
       const email = req.session.user.email;
       const incoming = req.body;
@@ -60,4 +60,4 @@ module.exports = function(usersCol) {
   });
 
   return router;
-};
+}; 

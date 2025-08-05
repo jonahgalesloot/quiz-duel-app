@@ -17,6 +17,20 @@ const MONGO_URI      = process.env.MONGO_URI;
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const RECAPTCHA_SITE = process.env.RECAPTCHA_SITE_KEY;
 
+// Helper function to get local IP for LAN access
+function getLocalIP() {
+  const { networkInterfaces } = require('os');
+  const nets = networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+  return 'localhost';
+}
+
 // ————— Middleware —————
 app.use(express.json());
 app.use(cookieParser());
@@ -59,47 +73,45 @@ MongoClient.connect(MONGO_URI)
     const usersCol = db.collection('users');
     const codesCol = db.collection('codes');
 
+    // Socket.io matchmaking, chat, etc.
+    const socketModule = require('./routes/socket')(io, db, usersCol);
+
     // Serve HTML pages
-    const pagesRouter = require('./routes/pages')((db));
+    const pagesRouter = require('./routes/pages')(db, socketModule.activeMatches);
     app.use('/', pagesRouter);
 
     // Auth routes (login/signup/logout)
     const authRouter = require('./routes/auth')(usersCol, codesCol, db);
     app.use('/', authRouter);
 
-    // Question‐sets API
-    const questionSetsRouter = require('./routes/api/questionSets')(db);
-    app.use('/api/questionSets', questionSetsRouter);
+    // Auth API routes
+    const avatarUpload = require('./routes/api/auth/avatar-upload')(usersCol);
+    app.use('/', avatarUpload);
 
-    // User info API (username + elo)
-    const userRouter = require('./routes/api/user')(usersCol);
-    app.use('/api/user', userRouter);
+    const avatarDownload = require('./routes/api/auth/avatar-download')(usersCol);
+    app.use('/', avatarDownload);
 
-    // Play settings (stored on user.playSettings)
-    const playSettingsRouter = require('./routes/playSettings')(usersCol);
+    const userRouter = require('./routes/api/auth/user')(usersCol);
+    app.use('/', userRouter);
+
+    // Game API routes
+    const questionSetsRouter = require('./routes/api/game/questionSets')(db);
+    app.use('/', questionSetsRouter);
+
+    const gameQuestionsRouter = require('./routes/api/game/questions')(db);
+    app.use('/', gameQuestionsRouter);
+
+    const aiGradeRouter = require('./routes/api/game/ai-grade');
+    app.use('/', aiGradeRouter);
+
+    // Settings API routes
+    const playSettingsRouter = require('./routes/api/settings/playSettings')(usersCol);
     app.use('/', playSettingsRouter);
 
-    const avatarUpload = require('./routes/api/avatar-upload')(usersCol);
-    app.use('/api/avatar-upload', avatarUpload);
-
-    const avatarDownload = require('./routes/api/avatar-download')(usersCol);
-    app.use('/api/avatar-download', avatarDownload);
-
-    // Socket.io matchmaking, chat, etc.
-    const socketModule = require('./routes/socket')(io, db, usersCol);
-    app.use('/socket', socketModule);
-
-    // AI grading API
-    const aiGradeRouter = require('./routes/api/ai-grade');
-    app.use('/api/ai-grade', aiGradeRouter);
-
-    // Game questions API
-    const gameQuestionsRouter = require('./routes/api/game-questions')(db);
-    app.use('/api/game/questions', gameQuestionsRouter);
-
     // Start server only after all routes are mounted
-    server.listen(PORT, () => {
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server listening on http://localhost:${PORT}`);
+      console.log(`🌐 LAN Access: http://${getLocalIP()}:${PORT}`);
     });
   })
   .catch(err => {

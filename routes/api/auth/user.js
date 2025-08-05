@@ -3,9 +3,9 @@ const express = require('express');
 module.exports = (usersCol) => {
   const router = express.Router();
 
-  // GET /api/user
+  // GET /api/auth/user
   // Returns { username, elo } for the currently logged-in user
-  router.get('/', async (req, res) => {
+  router.get('/api/auth/user', async (req, res) => {
     try {
       if (!req.session.user) {
         return res.status(401).json({ message: 'Not logged in' });
@@ -25,4 +25,4 @@ module.exports = (usersCol) => {
   });
 
   return router;
-};
+}; 

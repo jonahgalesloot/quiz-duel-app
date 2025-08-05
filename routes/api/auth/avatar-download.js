@@ -1,12 +1,12 @@
-// routes/api/avatar-download.js
+// routes/api/auth/avatar-download.js
 const express = require('express');
 const crypto  = require('crypto');
 
 module.exports = (usersCol) => {
   const router = express.Router();
 
-  // GET /api/avatar-download/:username
-  router.get('/:username', async (req, res) => {
+  // GET /api/auth/avatar-download/:username
+  router.get('/api/auth/avatar-download/:username', async (req, res) => {
     const { username } = req.params;
 
     // 1) Find the user
@@ -33,4 +33,4 @@ module.exports = (usersCol) => {
   });
 
   return router;
-};
+}; 
