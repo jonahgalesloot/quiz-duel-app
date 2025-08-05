@@ -1,120 +1,191 @@
 // routes/socket.js
-const activeMatches = {};  // matchId → [usernameA, usernameB]
-let queue = [];            // array of socket.id waiting for match
-let matchmakingLock = false; // simple lock for matchmaking
+const crypto = require('crypto');
+const engine = require('../game/engine');
+const state  = require('../game/state');
 
 module.exports = function(io, db, usersCol) {
+  const activeMatches = {};
+  let queue = [];
+  let matchmakingLock = false;
+
+  // helper: load the one question set from MongoDB
+  async function loadQuestions() {
+    const set = await db
+      .collection('sets')
+      .findOne({}, { projection: { questions: 1 } });
+    return set.questions;
+  }
+
   io.on('connection', socket => {
     const session = socket.handshake.session || {};
-    const user   = session.user;
-    console.log(`[SOCKET] Connected: ${socket.id} user=${user ? user.username : 'none'}`);
+    const user    = session.user;
+    console.log(`[SOCKET] Connected: ${socket.id} user=${user?.username || 'none'}`);
 
+
+    // --- Matchmaking ---
     socket.on('joinMatchmaking', async () => {
-      const user = socket.handshake.session.user;
-      console.log(`[SOCKET] joinMatchmaking from ${socket.id} user=${user ? user.username : 'none'}`);
-
       if (!user) return;
       if (queue.includes(socket.id)) return;
 
+      console.log(`[SOCKET] ${user.username} wants to join matchmaking`);
+
       if (matchmakingLock) {
         queue.push(socket.id);
-        socket.emit('systemLog', 'Waiting for opponent…');
-        console.log(`[SOCKET] ${socket.id} added to queue (locked). Queue:`, queue);
-        return;
+        return socket.emit('systemLog', 'Waiting for opponent…');
       }
       matchmakingLock = true;
 
       if (queue.length > 0) {
         const otherId = queue.shift();
-        const roomId  = Math.random().toString(36).slice(2,8).toUpperCase();
-
-        socket.join(roomId);
         const otherSocket = io.sockets.sockets.get(otherId);
-        if (!otherSocket) {
+
+        if (!otherSocket || !otherSocket.handshake.session.user) {
+          // requeue current if opponent invalid
           queue.push(socket.id);
           matchmakingLock = false;
-          console.log(`[SOCKET] Opponent ${otherId} disconnected before match. ${socket.id} requeued.`);
-          return socket.emit('systemLog', 'Opponent disconnected, waiting again…');
+          return socket.emit('systemLog', 'Opponent invalid, waiting again…');
         }
-        const otherUser = otherSocket.handshake.session.user;
-        if (!otherUser) {
-          queue.push(socket.id);
-          matchmakingLock = false;
-          console.log(`[SOCKET] Opponent ${otherId} has no session user. ${socket.id} requeued.`);
-          return socket.emit('systemLog', 'Opponent not logged in, waiting again…');
-        }
+
+        // Create a new room
+        const roomId = crypto.randomBytes(3).toString('hex').toUpperCase();
+        socket.join(roomId);
         otherSocket.join(roomId);
 
-        let youDoc, oppDoc;
-        try {
-          [youDoc, oppDoc] = await Promise.all([
-            usersCol.findOne({ email: user.email }, { projection: { username:1, elo:1 } }),
-            usersCol.findOne({ email: otherUser.email }, { projection: { username:1, elo:1 } })
-          ]);
-        } catch (e) {
-          matchmakingLock = false;
-          console.log(`[SOCKET] Error fetching user data for match:`, e);
-          return socket.emit('systemLog', 'Error fetching user data.');
-        }
+        const youDoc = await usersCol.findOne(
+          { email: user.email },
+          { projection: { username:1, elo:1 } }
+        );
+        const oppUser = otherSocket.handshake.session.user;
+        const oppDoc  = await usersCol.findOne(
+          { email: oppUser.email },
+          { projection: { username:1, elo:1 } }
+        );
 
+        // Track active match
         activeMatches[roomId] = [ youDoc.username, oppDoc.username ];
-        console.log(`[SOCKET] Match made: ${roomId} between ${youDoc.username} and ${oppDoc.username}`);
 
-        socket.emit('matched', { matchId: roomId, opponent: oppDoc });
-        otherSocket.emit('matched', { matchId: roomId, opponent: youDoc });
+        console.log(`[SOCKET] Matched ${youDoc.username} vs ${oppDoc.username} in ${roomId}`);
+
+        // Load questions and start the engine
+        const questions = await loadQuestions();
+        engine.startMatch(roomId, [ youDoc.username, oppDoc.username ], questions);
+
+        // Notify both clients
+        io.to(roomId).emit('matchStarted', {
+          matchId: roomId,
+          players: [ youDoc, oppDoc ],
+          questions // full array; client can index by question number
+        });
       } else {
         queue.push(socket.id);
         socket.emit('systemLog', 'Waiting for opponent…');
-        console.log(`[SOCKET] ${socket.id} added to queue. Queue:`, queue);
       }
+
       matchmakingLock = false;
     });
 
-    socket.on('joinMatch', (matchId) => {
-      socket.join(matchId);
-      const user = socket.handshake.session.user;
-      console.log(`[SOCKET] ${user ? user.username : socket.id} joined match room ${matchId}`);
-    });
-
-    socket.on('chatMessage', ({ matchId, message }) => {
-      const user = socket.handshake.session.user;
+    // --- Player ready ---
+    socket.on('playerReady', ({ matchId }) => {
       if (!user) return;
-      const sender = user.username;
-      console.log(`[SOCKET] Chat in ${matchId} from ${sender}: ${message}`);
-      io.to(matchId).emit('chatMessage', { username: sender, message });
-    });
-
-    socket.on('registerPlayer', ({ matchId, username }) => {
-      const players = activeMatches[matchId];
-      if (!players) return;
-      const oppUsername = players.find(u => u !== username);
-      if (!oppUsername) return;
-      // Find opponent by username for display, but use email for DB lookup if available
-      usersCol.findOne({ username: oppUsername }, { projection: { username:1, elo:1 } })
-        .then(oppDoc => {
-          if (!oppDoc) return;
-          io.to(matchId).emit('opponentInfo', oppDoc);
-          console.log(`[SOCKET] Sent opponentInfo for ${oppUsername} in match ${matchId}`);
-        });
-    });
-
-    socket.on('disconnect', () => {
-      const user = socket.handshake.session.user;
-      console.log(`[SOCKET] Disconnected: ${socket.id} user=${user ? user.username : 'none'}`);
-      const idx = queue.indexOf(socket.id);
-      if (idx !== -1) {
-        queue.splice(idx, 1);
-        console.log(`[SOCKET] ${socket.id} removed from queue on disconnect.`);
+      engine.setReady(matchId, user.username);
+      io.to(matchId).emit('systemLog', `${user.username} is ready!`);
+      if (engine.allReady(matchId)) {
+        engine.startGame(matchId);
+        io.to(matchId).emit('gameStarted');
+        sendQuestion(matchId);
       }
-      for (const [matchId, players] of Object.entries(activeMatches)) {
-        const room = io.sockets.adapter.rooms.get(matchId);
+    });
+
+    // --- Send question with timer ---
+    async function sendQuestion(matchId) {
+      const m = state.getMatch(matchId);
+      if (!m) return;
+      const q = m.questions[m.current];
+      io.to(matchId).emit('question', {
+        question: q,
+        index: m.current
+      });
+      // Timer logic
+      let timeLeft = q.timeLimit || 15;
+      io.to(matchId).emit('timer', { timeLeft });
+      m.timers.timer = setInterval(() => {
+        timeLeft--;
+        io.to(matchId).emit('timer', { timeLeft });
+        if (timeLeft <= 0) {
+          clearInterval(m.timers.timer);
+          io.to(matchId).emit('systemLog', 'Time up!');
+          // Auto-submit blank for those who didn't answer
+          m.players.forEach(u => {
+            if (!(u in m.answers)) {
+              socket.emit('submitAnswer', { matchId, answer: null });
+            }
+          });
+        }
+      }, 1000);
+    }
+
+
+    // --- Answer submission ---
+    socket.on('submitAnswer', async ({ matchId, answer }) => {
+      if (!user) return;
+      try {
+        const result = await engine.submitAnswer(matchId, user.username, answer);
+        // Broadcast the result to everyone in the room
+        io.to(matchId).emit('answerResult', {
+          username: user.username,
+          correct:   result.correct,
+          scores:    result.scores,
+          aiResult:  result.aiResult
+        });
+
+        // If all answered, move to next question or end
+        const m = state.getMatch(matchId);
+        if (m && m.players.every(u => u in m.answers)) {
+          clearInterval(m.timers.timer);
+          setTimeout(() => {
+            if (result.next === false) {
+              io.to(matchId).emit('matchOver', { scores: result.scores });
+              state.cleanup(matchId);
+              delete activeMatches[matchId];
+            } else {
+              sendQuestion(matchId);
+            }
+          }, 2000); // 2s pause before next question
+        }
+      } catch (err) {
+        console.error(`[SOCKET] submitAnswer error for ${user.username} in ${matchId}:`, err);
+        socket.emit('error', { message: err.message });
+      }
+    });
+
+    // --- Chat (optional) ---
+    socket.on('chatMessage', ({ matchId, message }) => {
+      if (!user) return;
+      io.to(matchId).emit('chatMessage', {
+        username: user.username,
+        message
+      });
+    });
+
+    // --- Disconnect handling ---
+    socket.on('disconnect', () => {
+      console.log(`[SOCKET] Disconnected: ${socket.id} user=${user?.username || 'none'}`);
+      // Remove from queue if waiting
+      const idx = queue.indexOf(socket.id);
+      if (idx !== -1) queue.splice(idx, 1);
+
+      // Clean up any empty matches
+      for (const [roomId, players] of Object.entries(activeMatches)) {
+        const room = io.sockets.adapter.rooms.get(roomId);
         if (!room || room.size === 0) {
-          console.log(`[SOCKET] Cleaning up empty match ${matchId}`);
-          delete activeMatches[matchId];
+          console.log(`[SOCKET] Cleaning up empty match ${roomId}`);
+          state.cleanup(roomId);
+          delete activeMatches[roomId];
         }
       }
     });
   });
-};
 
-module.exports.activeMatches = activeMatches;
+  // Expose activeMatches if needed elsewhere
+  return { activeMatches };
+};

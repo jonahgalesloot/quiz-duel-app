@@ -3,7 +3,7 @@ require('dotenv').config();
 const path          = require('path');
 const express       = require('express');
 const http          = require('http');
-const socketIo      = require('socket.io');
+const socketIo      = require('socket.io')(server);
 const session       = require('express-session');
 const MongoStore    = require('connect-mongo');
 const cookieParser  = require('cookie-parser');
@@ -88,7 +88,16 @@ MongoClient.connect(MONGO_URI)
     app.use('/api/avatar-download', avatarDownload);
 
     // Socket.io matchmaking, chat, etc.
-    require('./routes/socket')(io, db, usersCol);
+    const socketModule = require('./routes/socket')(io, db, usersCol);
+    app.use('/socket', socketModule);
+
+    // AI grading API
+    const aiGradeRouter = require('./routes/api/ai-grade');
+    app.use('/api/ai-grade', aiGradeRouter);
+
+    // Game questions API
+    const gameQuestionsRouter = require('./routes/api/game-questions')(db);
+    app.use('/api/game/questions', gameQuestionsRouter);
 
     // Start server only after all routes are mounted
     server.listen(PORT, () => {
