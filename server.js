@@ -1,9 +1,7 @@
-// server.js
 require('dotenv').config();
 const path          = require('path');
 const express       = require('express');
 const http          = require('http');
-const socketIo      = require('socket.io')(server);
 const session       = require('express-session');
 const MongoStore    = require('connect-mongo');
 const cookieParser  = require('cookie-parser');
@@ -11,8 +9,8 @@ const { MongoClient } = require('mongodb');
 const sharedsession = require("express-socket.io-session");
 
 const app     = express();
-const io      = socketIo(server);
-const server  = http.createServer(app);
+const server  = http.createServer(app);         // <-- Create server FIRST
+const io      = require('socket.io')(server); 
 
 const PORT           = process.env.PORT || 3000;
 const MONGO_URI      = process.env.MONGO_URI;
